@@ -152,6 +152,17 @@ class CausalSelfAttention(nn.Module):
           self.head_dim,
           enable_hlfb,
       )
+    #TODO: OpenELM normalization stuff
+    if config.normalize_qk_projections:
+       self.q_norm = RMSNorm(
+           num_features=config.head_dim,
+       )
+       self.k_norm = RMSNorm(
+           num_features=config.head_dim,
+       )
+   else:
+       self.q_norm = None
+       self.k_norm = None
 
     if enable_hlfb:
       self.sdpa_func = scaled_dot_product_attention_with_hlfb
@@ -198,7 +209,13 @@ class CausalSelfAttention(nn.Module):
       qkv_axis = -2
 
     # Split batched computation into three.
-    q, k, v = qkv.split((q_per_kv, 1, 1), dim=qkv_axis)
+    q, k, v = qkv.split((q_per_kv, 1, 1), dim=-2)
+    #TODO:  OpenELM support pre normalization stuff
+    #if self.q_norm is not None:
+    #   q = self.q_norm(q)
+    #if self.k_norm is not None:
+    #   k = self.k_norm(k)
+
     q = q.reshape(B, T, -1, self.head_dim)
     k = k.reshape(B, T, -1, self.head_dim)
     v = v.reshape(B, T, -1, self.head_dim)
