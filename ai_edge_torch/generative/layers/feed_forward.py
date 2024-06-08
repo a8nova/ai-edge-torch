@@ -41,7 +41,7 @@ class SequentialFeedForward(nn.Module):
     """
     super().__init__()
     self.act = activation
-    self.w1 = nn.Linear(dim, hidden_dim, bias=use_bias)
+    self.w1 = nn.Linear(dim, hidden_dim*2, bias=use_bias)
     self.w2 = nn.Linear(hidden_dim, dim, bias=use_bias)
 
   def forward(self, x):
@@ -79,9 +79,9 @@ class GatedFeedForward(nn.Module):
     """
     super().__init__()
     self.act = activation
-    self.w1 = nn.Linear(dim, hidden_dim, bias=use_bias)
+    self.w1_w3 = nn.Linear(dim, hidden_dim*2, bias=use_bias)
     self.w2 = nn.Linear(hidden_dim, dim, bias=use_bias)
-    self.w3 = nn.Linear(dim, hidden_dim, bias=use_bias)
+    #self.w3 = nn.Linear(dim, hidden_dim, bias=use_bias)
 
   def forward(self, x):
     """Forward pass for Feedforward layer.
@@ -92,4 +92,7 @@ class GatedFeedForward(nn.Module):
     Returns:
       torch.Tensor: output tensor after feedforward.
     """
-    return self.w2(self.act(self.w1(x)) * self.w3(x))
+    up_states = self.w1_w3(x)
+    gate, up_states = up_states.chunk(2, dim=-1)
+    up_states = up_states * self.act(gate)
+    return self.w2(up_states)

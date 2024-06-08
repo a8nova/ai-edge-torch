@@ -163,7 +163,7 @@ class ModelLoader:
         converted_state["lm_head.bias"] = state.pop(f"{self._names.lm_head}.bias")
     if self._names.final_norm is not None:
       final_norm_name = self._names.final_norm
-      converted_state["final_norm.weight"] = state.pop(f"{final_norm_name}.weight")
+      converted_state["norm.weight"] = state.pop(f"{final_norm_name}.weight")
       if f"{final_norm_name}.bias" in state:
         converted_state["final_norm.bias"] = state.pop(f"{final_norm_name}.bias")
 
@@ -222,16 +222,16 @@ class ModelLoader:
         converted_state[f"{prefix}.ff.w1.bias"] = state.pop(f"{ff_up_proj_name}.bias")
         converted_state[f"{prefix}.ff.w2.bias"] = state.pop(f"{ff_down_proj_name}.bias")
     else:
-      ff_up_proj_name = self._names.ff_up_proj.format(idx)
+      ff_gate_up_proj_name = self._names.ff_up_proj.format(idx)
       ff_down_proj_name = self._names.ff_down_proj.format(idx)
-      ff_gate_proj_name = self._names.ff_gate_proj.format(idx)
-      converted_state[f"{prefix}.ff.w3.weight"] = state.pop(f"{ff_up_proj_name}.weight")
+      #ff_gate_proj_name = self._names.ff_gate_proj.format(idx)
+      converted_state[f"{prefix}.ff.w1_w3.weight"] = state.pop(f"{ff_gate_up_proj_name}.weight")
       converted_state[f"{prefix}.ff.w2.weight"] = state.pop(
           f"{ff_down_proj_name}.weight"
       )
-      converted_state[f"{prefix}.ff.w1.weight"] = state.pop(
-          f"{ff_gate_proj_name}.weight"
-      )
+      #converted_state[f"{prefix}.ff.w1.weight"] = state.pop(
+      #    f"{ff_gate_proj_name}.weight"
+      #)
       if config.ff_config.use_bias:
         converted_state[f"{prefix}.ff.w3.bias"] = state.pop(f"{ff_up_proj_name}.bias")
         converted_state[f"{prefix}.ff.w2.bias"] = state.pop(f"{ff_down_proj_name}.bias")
