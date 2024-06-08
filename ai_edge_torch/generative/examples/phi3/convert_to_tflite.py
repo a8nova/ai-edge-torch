@@ -19,17 +19,17 @@ from pathlib import Path
 import torch
 
 import ai_edge_torch
-from ai_edge_torch.generative.examples.phi2 import phi2
+from ai_edge_torch.generative.examples.phi3 import phi3
 from ai_edge_torch.generative.quantize import quant_recipes
 
 
-def convert_phi2_to_tflite(
+def convert_phi3_to_tflite(
     checkpoint_path: str,
     prefill_seq_len: int = 512,
     kv_cache_max_len: int = 1024,
     quantize: bool = True,
 ):
-  """An example method for converting a Phi-2 model to multi-signature
+  """An example method for converting a Phi-3 model to multi-signature
   tflite model.
 
   Args:
@@ -41,7 +41,7 @@ def convert_phi2_to_tflite(
       quantize (bool, optional): Whether the model should be quanized.
         Defaults to True.
   """
-  pytorch_model = phi2.build_model(checkpoint_path, kv_cache_max_len=kv_cache_max_len)
+  pytorch_model = phi3.build_model(checkpoint_path, kv_cache_max_len=kv_cache_max_len)
   # Tensors used to trace the model graph during conversion.
   prefill_tokens = torch.full((1, prefill_seq_len), 0, dtype=torch.long)
   prefill_input_pos = torch.arange(0, prefill_seq_len)
@@ -56,9 +56,9 @@ def convert_phi2_to_tflite(
       .signature('decode', pytorch_model, (decode_token, decode_input_pos))
       .convert(quant_config=quant_config)
   )
-  edge_model.export(f'/tmp/phi2_seq{prefill_seq_len}_kv{kv_cache_max_len}.tflite')
+  edge_model.export(f'/tmp/phi3_seq{prefill_seq_len}_kv{kv_cache_max_len}.tflite')
 
 
 if __name__ == '__main__':
-  checkpoint_path = os.path.join(Path.home(), 'Downloads/llm_data/phi2')
-  convert_phi2_to_tflite(checkpoint_path)
+  checkpoint_path = os.path.join(Path.home(), 'Downloads/llm_data/phi3')
+  convert_phi3_to_tflite(checkpoint_path)
